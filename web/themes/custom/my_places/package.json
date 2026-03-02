@@ -1,0 +1,22 @@
+{
+  "name": "my-places",
+  "version": "1.0.0",
+  "description": "Build tools for the My Places demo theme (geofield_map_marker).",
+  "scripts": {
+    "compile": "gulp compile",
+    "compile:watch": "gulp compile --watch",
+    "css": "gulp css",
+    "css:watch": "gulp css --watch",
+    "js": "gulp js",
+    "js:watch": "gulp js --watch"
+  },
+  "dependencies": {
+    "gulp": "^4.0.2",
+    "gulp-sass": "^5.1.0",
+    "sass": "^1.69.0",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-rename": "^2.0.0",
+    "require-dir": "^0.3.0"
+  },
+  "devDependencies": {}
+}

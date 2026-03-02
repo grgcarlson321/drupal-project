@@ -1,0 +1,14 @@
+# Replace INSERT_GOOGLE_MAPS_API_KEY with your actual Google Maps API key.
+# The same key must also be set in geocoder.geocoder_provider.googlemaps.yml.
+gmap_api_key: INSERT_GOOGLE_MAPS_API_KEY
+gmap_api_localization: default
+theming:
+  markers_location:
+    security: 'public://'
+    rel_path: geofieldmap_icons
+  additional_markers_location: ''
+  markers_extensions: 'gif png jpg jpeg'
+  markers_filesize: '250 KB'
+geocoder:
+  caching:
+    clientside: session_storage

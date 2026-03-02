@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Location Category'
+vid: location_category
+description: 'Used to group or label map_item nodes (e.g. city, region, type of place). Maps to field_category.'
+weight: 0
+new_revision: false

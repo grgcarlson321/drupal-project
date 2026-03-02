@@ -1,0 +1,52 @@
+{#
+/**
+ * @file
+ * Theme override for the map_items_list view, block_1 display.
+ *
+ * Renders the split map / card-list layout using the map-display component.
+ *
+ * Variables:
+ * - attachment_before: The geofield Google Map (attachment_1 display).
+ * - rows: The card list (rendered map_item nodes in card_horizontal mode).
+ * - empty: Message shown when there are no results.
+ * - exposed: The exposed filter form (category taxonomy select).
+ */
+#}
+{%
+  set classes = [
+    dom_id ? 'js-view-dom-id-' ~ dom_id,
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>
+  <h2 class="visually-hidden">{{ 'Location List'|t }}</h2>
+  {{ title_prefix }}
+  {{ title }}
+  {{ title_suffix }}
+
+  {% if header %}
+    <header>
+      {{ header }}
+    </header>
+  {% endif %}
+
+  {%
+    include '@my-places-components/map-display/map-display.twig' with {
+      exposed: exposed,
+      map: attachment_before,
+      rows: rows,
+      empty: empty,
+    } only
+  %}
+
+  {{ pager }}
+  {{ attachment_after }}
+  {{ more }}
+
+  {% if footer %}
+    <footer>
+      {{ footer }}
+    </footer>
+  {% endif %}
+
+  {{ feed_icons }}
+</div>

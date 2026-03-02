@@ -1,0 +1,12 @@
+// @file
+// Color and typography design tokens.
+
+// Core palette
+$white:  #ffffff;
+$black:  #000000;
+$aqua:   #2E808E;   // Primary: map marker fill, circle icon fill, preTitle color
+$orange: #D0451B;   // Active/hover state for markers and circle icons
+$gray-2: #e0e0e0;   // Card border color
+
+// Typography
+$font-family-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;

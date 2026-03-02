@@ -1,0 +1,21 @@
+map_list:
+  version: 1.0
+  js:
+    js/map_list.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+    - core/drupalSettings
+    - geofield_map/geofield_google_map
+
+map_node:
+  version: 1.0
+  js:
+    js/map_node.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+    - core/drupalSettings
+    - geofield_map/geofield_google_map

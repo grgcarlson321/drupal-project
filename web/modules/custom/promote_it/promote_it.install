@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the promote_it module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\field\Entity\FieldStorageConfig;
+
+/**
+ * Implements hook_install().
+ */
+function promote_it_install(): void {
+  // Create the field storage for promotion weight field using custom field type.
+  if (!FieldStorageConfig::loadByName('node', 'field_promotion_weight')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_promotion_weight',
+      'entity_type' => 'node',
+      'type' => 'promote_weight',
+      'cardinality' => 1,
+      'settings' => [],
+      'locked' => FALSE,
+    ])->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function promote_it_uninstall(): void {
+  // Remove the field storage for promotion weight field.
+  $field_storage = FieldStorageConfig::loadByName('node', 'field_promotion_weight');
+  if ($field_storage) {
+    $field_storage->delete();
+  }
+}

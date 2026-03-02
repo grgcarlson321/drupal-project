@@ -1,0 +1,39 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_map_coordinates
+    - node.type.map_item
+  module:
+    - geocoder_field
+    - geofield
+third_party_settings:
+  geocoder_field:
+    method: geocode
+    weight: 0
+    field: field_geocode
+    skip_not_empty_value: false
+    disabled: true
+    hidden: true
+    providers:
+      - googlemaps
+    dumper: wkt
+    delta_handling: default
+    failure:
+      handling: preserve
+      status_message: true
+      log: true
+    reverse_geocode:
+      field: ''
+id: node.map_item.field_map_coordinates
+field_name: field_map_coordinates
+entity_type: node
+bundle: map_item
+label: 'Map Coordinates'
+description: 'Geofield auto-populated by geocoder_field from field_geocode. Hidden from content editors.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: geofield

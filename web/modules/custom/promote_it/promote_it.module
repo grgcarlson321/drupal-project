@@ -1,0 +1,276 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Promote It module.
+ *
+ * Provides hooks for adding promotion weight field configuration to content
+ * types, integrating with node forms, and ensuring Views compatibility.
+ */
+
+declare(strict_types=1);
+
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_help().
+ */
+function promote_it_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.promote_it':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Promote It - promote your content.') . '</p>';
+      return $output;
+
+    default:
+      return NULL;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_type_form.
+ */
+function promote_it_form_node_type_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\node\Entity\NodeType $node_type */
+  $node_type = $form_state->getFormObject()->getEntity();
+
+  // Add a checkbox to enable/disable promotion weight field.
+  $form['promote_it'] = [
+    '#type' => 'details',
+    '#title' => t('Promotion settings'),
+    '#group' => 'additional_settings',
+  ];
+
+  $form['promote_it']['enable_promotion_weight'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Enable weighted promotion'),
+    '#description' => t('Add a promotion weight field to this content type for ordering promoted content. This allows you to control the display order of promoted items.'),
+    '#default_value' => _promote_it_has_weight_field($node_type->id()),
+  ];
+
+  $form['actions']['submit']['#submit'][] = 'promote_it_node_type_form_submit';
+}
+
+/**
+ * Custom submit handler for node type form.
+ */
+function promote_it_node_type_form_submit($form, FormStateInterface $form_state) {
+  $node_type_id = $form_state->getFormObject()->getEntity()->id();
+  $enable_weight = $form_state->getValue('enable_promotion_weight');
+
+  if ($enable_weight && !_promote_it_has_weight_field($node_type_id)) {
+    _promote_it_add_weight_field($node_type_id);
+    \Drupal::messenger()->addStatus(t('Promotion weight field has been added to %type content type.', [
+      '%type' => $form_state->getFormObject()->getEntity()->label(),
+    ]));
+  }
+  elseif (!$enable_weight && _promote_it_has_weight_field($node_type_id)) {
+    _promote_it_remove_weight_field($node_type_id);
+    \Drupal::messenger()->addStatus(t('Promotion weight field has been removed from %type content type.', [
+      '%type' => $form_state->getFormObject()->getEntity()->label(),
+    ]));
+  }
+}
+
+/**
+ * Check if node type has promotion weight field.
+ *
+ * @param string $node_type_id
+ *   The node type ID.
+ *
+ * @return bool
+ *   TRUE if the node type has a promotion weight field.
+ */
+function _promote_it_has_weight_field(string $node_type_id): bool {
+  $field_definitions = \Drupal::service('entity_field.manager')
+    ->getFieldDefinitions('node', $node_type_id);
+
+  foreach ($field_definitions as $field_definition) {
+    if ($field_definition->getType() === 'promote_weight') {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Add promotion weight field to node type.
+ *
+ * @param string $node_type_id
+ *   The node type ID.
+ */
+function _promote_it_add_weight_field(string $node_type_id): void {
+  $field_storage = FieldStorageConfig::loadByName('node', 'field_promotion_weight');
+
+  // Create field storage if it doesn't exist.
+  if (!$field_storage) {
+    $field_storage = FieldStorageConfig::create([
+      'field_name' => 'field_promotion_weight',
+      'entity_type' => 'node',
+      'type' => 'promote_weight',
+      'cardinality' => 1,
+      'locked' => FALSE,
+    ]);
+    $field_storage->save();
+  }
+
+  // Create field instance.
+  $field = FieldConfig::create([
+    'field_storage' => $field_storage,
+    'bundle' => $node_type_id,
+    'label' => t('Promotion Weight'),
+    'required' => FALSE,
+    'default_value' => [['value' => 0]],
+    'description' => t('Lower values appear first in promoted content lists.'),
+  ]);
+  $field->save();
+
+  // Set form display.
+  $form_display = \Drupal::service('entity_display.repository')
+    ->getFormDisplay('node', $node_type_id, 'default');
+  $form_display->setComponent('field_promotion_weight', [
+    'type' => 'promote_weight',
+    'weight' => 1,
+    'settings' => [],
+    'region' => 'content',
+  ])->save();
+
+  // Hide from display (weight is for ordering, not display).
+  $view_display = \Drupal::service('entity_display.repository')
+    ->getViewDisplay('node', $node_type_id, 'default');
+  $view_display->removeComponent('field_promotion_weight')->save();
+}
+
+/**
+ * Remove promotion weight field from node type.
+ *
+ * @param string $node_type_id
+ *   The node type ID.
+ */
+function _promote_it_remove_weight_field(string $node_type_id): void {
+  $field = FieldConfig::loadByName('node', $node_type_id, 'field_promotion_weight');
+  if ($field) {
+    $field->delete();
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ */
+function promote_it_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Check if the node has a promotion weight field (any field of type promote_weight).
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $form_state->getFormObject()->getEntity();
+
+  $field_definitions = \Drupal::service('entity_field.manager')
+    ->getFieldDefinitions('node', $node->bundle());
+
+  $weight_field_name = NULL;
+  foreach ($field_definitions as $field_name => $field_definition) {
+    if ($field_definition->getType() === 'promote_weight') {
+      $weight_field_name = $field_name;
+      break;
+    }
+  }
+
+  if (!$weight_field_name || !isset($form[$weight_field_name])) {
+    return;
+  }
+
+  // Move the promotion weight field to the options group.
+  $form[$weight_field_name]['#group'] = 'options';
+  $form[$weight_field_name]['#weight'] = 1;
+  
+  // Show the weight field only when the promote checkbox is checked.
+  $form[$weight_field_name]['#states'] = [
+    'visible' => [
+      ':input[name="promote"]' => ['checked' => TRUE],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function promote_it_views_data_alter(array &$data) {
+  // Ensure all promote_weight field types have proper Views handlers.
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $entity_type_manager = \Drupal::service('entity_type.manager');
+
+  // Get all node types.
+  $node_types = $entity_type_manager->getStorage('node_type')->loadMultiple();
+
+  foreach ($node_types as $node_type) {
+    $bundle = $node_type->id();
+    $field_definitions = $entity_field_manager->getFieldDefinitions('node', $bundle);
+
+    foreach ($field_definitions as $field_name => $field_definition) {
+      if ($field_definition->getType() === 'promote_weight') {
+        // Get the table name for this field.
+        $table_name = 'node__' . $field_name;
+        $field_column = $field_name . '_value';
+
+        if (isset($data[$table_name][$field_column])) {
+          // Ensure the sort handler is set to numeric.
+          $data[$table_name][$field_column]['sort']['id'] = 'standard';
+
+          // Ensure the filter handler allows numeric filtering.
+          $data[$table_name][$field_column]['filter']['id'] = 'numeric';
+
+          // Ensure the argument handler is numeric.
+          $data[$table_name][$field_column]['argument']['id'] = 'numeric';
+
+          // Add helpful title and description.
+          $data[$table_name][$field_column]['title'] = t('Promotion Weight');
+          $data[$table_name][$field_column]['help'] = t('The weight value used for ordering promoted content. Lower values appear first.');
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ *
+ * Keeps the promotion weight field in sync with Drupal's native promote flag.
+ *
+ * When a node is promoted for the first time and has no weight assigned, the
+ * next available weight is automatically assigned so the node appears at the
+ * end of the existing promoted list. When a node is unpromoted the weight
+ * field is cleared so stale weights do not persist and affect future ordering.
+ */
+function promote_it_node_presave(NodeInterface $node): void {
+  /** @var \Drupal\promote_it\Service\PromoteFieldHelperService $field_helper */
+  $field_helper = \Drupal::service('promote_it.field_helper');
+  $field_name = $field_helper->getWeightFieldName($node->bundle());
+
+  if (!$field_name || !$node->hasField($field_name)) {
+    return;
+  }
+
+  $new_promote = (bool) $node->get('promote')->value;
+  // For new nodes $node->original does not exist; treat them as unpromoted.
+  $was_promoted = isset($node->original)
+    ? (bool) $node->original->get('promote')->value
+    : FALSE;
+
+  if ($new_promote && !$was_promoted) {
+    // The node is being promoted for the first time in this save. Only assign
+    // a weight when one has not already been set (e.g. via the promote form).
+    if ($node->get($field_name)->value === NULL) {
+      /** @var \Drupal\promote_it\Service\PromoteWeightService $weight_service */
+      $weight_service = \Drupal::service('promote_it.promote_weight_service');
+      $node->set($field_name, $weight_service->getNextWeight());
+    }
+  }
+  elseif (!$new_promote && $was_promoted) {
+    // The node is being unpromoted; clear the weight so it does not linger.
+    $node->set($field_name, NULL);
+  }
+}

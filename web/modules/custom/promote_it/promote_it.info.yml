@@ -1,0 +1,10 @@
+name: Promote It
+type: module
+description: 'Promote your content on front page.'
+package: Content
+core_version_requirement: ^10.3 || ^11.0
+dependencies:
+  - drupal:block
+  - drupal:node
+  - drupal:field
+  - drupal:views

@@ -1,0 +1,27 @@
+{
+  "name": "drupal-recipe/geofield-map-marker-demo",
+  "description": "Composer dependencies required to run the geofield_map_marker module, my_places theme, and this Drupal recipe on a fresh Drupal 10/11 site.",
+  "type": "drupal-recipe",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "drupal/geofield": "^1.39",
+    "drupal/geofield_map": "^11.1",
+    "drupal/geocoder": "^4.0",
+    "geocoder-php/google-maps-provider": "^4.6",
+    "drupal/better_exposed_filters": "^7.1",
+    "drupal/components": "^3.1",
+    "drupal/twig_field_value": "^2.0"
+  },
+  "suggest": {
+    "drupal/twig_tweak": "Useful Twig helpers for templates (e.g. drupal_field, drupal_block).",
+    "drupal/pathauto": "Generates clean URL aliases for map_item nodes automatically."
+  },
+  "extra": {
+    "notes": [
+      "geocoder_field is a sub-module of drupal/geocoder — no separate Composer package required.",
+      "GSAP: download from https://www.npmjs.com/package/gsap and place gsap.min.js at web/libraries/gsap/minified/gsap.min.js",
+      "in-view: download from https://www.npmjs.com/package/in-view and place in-view.min.js at web/libraries/in-view/in-view.min.js",
+      "Replace INSERT_GOOGLE_MAPS_API_KEY in config files before applying the recipe."
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+g{#
+/**
+ * @file
+ * Card-horizontal view mode template for the map_item content type.
+ *
+ * Used by the map_items_list view (block_1 display, rendered_entity field).
+ *
+ * The article element receives id="map-item-id-{nid}" so that map_list.js
+ * can find the node ID for each card and correlate it with the map marker.
+ *
+ * Variables provided by geofield_map_marker_preprocess_node():
+ * - content.card_count: Numeric position rendered as <span id="map-count-N">.
+ *
+ * Standard node template variables:
+ * - node: The map_item node entity.
+ * - label: The node title.
+ * - url: The canonical URL.
+ * - content: Rendered field output keyed by field name.
+ * - attributes: HTML attributes for the article element.
+ */
+#}
+{% import '@my-places-components/component.twig' as component %}
+{% do attach_library('my_places/card-horizontal') %}
+
+{% set card_label = content.card_count|render|striptags|trim %}
+
+{#
+  The id attribute "map-item-id-{nid}" is read by map_list.js:
+    $('article[id^="map-item-id-"]').map(function() {
+      return this.id.split('-').slice(-1)[0]; // returns the nid
+    });
+#}
+<article {{ component.attributes(['c-card-horizontal', 'click-region'], null, {'id': 'map-item-id-' ~ node.id()}) }}>
+  <div class="c-card-horizontal__content">
+    {#
+      SVG circle icon: id="circle-card--N" is toggled between $aqua and $orange
+      by map_list.js on hover/click to sync with the map marker.
+    #}
+    <svg class="shadow" width="32" height="32" viewBox="0 0 32 32"
+         fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle id="circle-card--{{ card_label }}" cx="16" cy="16" r="11.5" stroke="white"/>
+      <text class="text-icon" x="50%" y="50%" text-anchor="middle"
+            stroke="white" dy=".3em">{{ card_label }}</text>
+    </svg>
+    <h3 class="c-card-horizontal__title">
+      <span class="c-card-horizontal__preTitle">{{ content.field_category }}</span>
+      <a href="{{ url }}" class="click-region__target">{{ label }}</a>
+    </h3>
+  </div>
+</article>

@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+name: 'Map Item'
+type: map_item
+description: 'A single location displayed as a numbered marker on the interactive map.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: false

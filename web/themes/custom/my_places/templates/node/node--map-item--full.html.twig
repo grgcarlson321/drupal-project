@@ -1,0 +1,39 @@
+{#
+/**
+ * @file
+ * Full page template for the map_item content type.
+ *
+ * Attaches the my_places/card-horizontal library (inherited through the
+ * card-horizontal view mode used on the list page) and renders the full
+ * detail view of a single location.
+ *
+ * Available variables (standard node template variables):
+ * - node: The map_item node entity.
+ * - label: The node title.
+ * - url: The canonical node URL.
+ * - content: Rendered field output keyed by field name.
+ * - attributes: HTML attributes for the article element.
+ */
+#}
+{% do attach_library('my_places/card-horizontal') %}
+
+<article{{ attributes.addClass('c-map-item-page') }}>
+
+  <header class="c-map-item-page__header">
+    <div class="c-map-item-page__header-text">
+      <h1>
+        <span class="c-map-item-page__category">{{ content.field_category }}</span>
+        {{ label }}
+      </h1>
+      {{ content.field_intro_text }}
+    </div>
+  </header>
+
+  <div{{ content_attributes.addClass('c-map-item-page__body') }}>
+
+    {# Map — single-marker geofield display; marker overlay added by map_node.js. #}
+    {{ content.field_map_coordinates }}
+
+  </div>
+
+</article>

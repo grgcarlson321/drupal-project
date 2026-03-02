@@ -1,0 +1,26 @@
+name: 'My Places'
+type: theme
+description: 'Generic demo theme for the geofield_map_marker module. Provides an interactive split map/card-list layout for any location-based content type.'
+package: 'Custom'
+core_version_requirement: ^10.0 || ^11.0
+base theme: stable9
+dependencies:
+  - 'stable9:stable9'
+  - drupal:components
+
+regions:
+  header: Header
+  primary_menu: 'Primary Menu'
+  content: Content
+  sidebar_first: 'First Sidebar'
+  sidebar_second: 'Second Sidebar'
+  footer: Footer
+  breadcrumb: Breadcrumb
+
+libraries:
+  - my_places/global
+
+components:
+  namespaces:
+    my-places-components:
+      - components

@@ -1,0 +1,6 @@
+// @file
+// Master partials import. Each component SCSS file imports this to get
+// variables, mixins, and breakpoint utilities.
+
+@import "variables";
+@import "mixins";

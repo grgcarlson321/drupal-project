@@ -1,0 +1,40 @@
+name: 'Geofield Map Marker Demo'
+description: 'Sets up the map_item content type, location_category taxonomy vocabulary, all required fields, the map_items_list view, and geocoder configuration needed to run the geofield_map_marker module and my_places theme on a fresh Drupal 10/11 site.'
+type: 'Site'
+
+install:
+  - node
+  - taxonomy
+  - text
+  - options
+  - geofield
+  - geofield_map
+  - geocoder
+  - geocoder_field
+  - views
+  - better_exposed_filters
+  - geofield_map_marker
+
+config:
+  import:
+    node:
+      - node.type.map_item
+      - core.entity_view_mode.node.card_horizontal
+    taxonomy:
+      - taxonomy.vocabulary.location_category
+    geofield_map:
+      - geofield_map.settings
+    geocoder:
+      - geocoder.geocoder_provider.googlemaps
+  strict: false
+
+  actions:
+    # Grant content admin permissions to the editor role (create if missing).
+    user.role.editor:
+      createIfNotExists:
+        label: 'Editor'
+      grantPermissions:
+        - 'create map_item content'
+        - 'edit any map_item content'
+        - 'delete any map_item content'
+        - 'access content overview'

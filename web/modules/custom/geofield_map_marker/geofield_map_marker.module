@@ -1,0 +1,181 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\node\NodeInterface;
+use Drupal\views\ViewExecutable;
+
+/**
+ * Implements hook_help().
+ */
+function geofield_map_marker_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.geofield_map_marker':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides interactive Google Map marker functionality for location content types. Replaces default geofield markers with numbered SVG circles, syncs hover/click state between a card list and the map, and adds a transit layer toggle button.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function geofield_map_marker_theme() {
+  return [
+    'map_marker_map' => [
+      'variables' => [],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_node_presave().
+ *
+ * Builds the geocode input string from the node title and the selected
+ * category taxonomy term, then writes it to field_geocode. The geocoder_field
+ * module reads field_geocode to populate field_map_coordinates (geofield).
+ */
+function geofield_map_marker_node_presave(NodeInterface $entity) {
+  if ($entity->getType() === 'map_item') {
+    if ($entity->hasField('field_category') && !$entity->get('field_category')->isEmpty()) {
+      $title = $entity->label();
+      // Strip any comma-separated suffix from the title so we get only the
+      // primary location name.
+      $title_parts = preg_split('/,/', (string) $title);
+      $primary_title = trim($title_parts[0]);
+
+      /** @var \Drupal\taxonomy\TermInterface $term */
+      $term = $entity->get('field_category')->entity;
+      if ($term !== NULL) {
+        $category_name = $term->label();
+        $geocode_string = $primary_title . ', ' . $category_name;
+        $entity->set('field_geocode', $geocode_string);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * - attachment_1: Attaches the map_list JS library and passes marker data
+ *   (nid, url, title, category) into drupalSettings for use by the map JS.
+ * - block_1: Attaches a sequential card_count integer to each result entity
+ *   so the card-horizontal template can render numbered circle icons.
+ */
+function geofield_map_marker_views_pre_render(ViewExecutable $view) {
+  $view_id = $view->id();
+  $view_current_display = $view->current_display;
+
+  if ($view_id === 'map_items_list' && $view_current_display === 'attachment_1') {
+    // Attach the list map library to this view display.
+    $view->element['#attached']['library'][] = 'geofield_map_marker/map_list';
+
+    $view_result = $view->result;
+    $count = 0;
+
+    foreach ($view_result as $key => $result) {
+      if (isset($view_result[$key]->_entity)) {
+        $node = $view_result[$key]->_entity;
+
+        $view->element['#attached']['drupalSettings']['list']['markers'][$count]['nid'] = $node->get('nid')->value;
+        $view->element['#attached']['drupalSettings']['list']['markers'][$count]['url'] = $node->toUrl()->toString();
+        $view->element['#attached']['drupalSettings']['list']['markers'][$count]['title'] = $node->get('title')->value;
+
+        $category_tid = $node->get('field_category')->target_id ?? NULL;
+        if ($category_tid !== NULL) {
+          $terms = \Drupal::entityTypeManager()
+            ->getStorage('taxonomy_term')
+            ->loadByProperties(['tid' => $category_tid]);
+          $term = reset($terms);
+          if ($term) {
+            $view->element['#attached']['drupalSettings']['list']['markers'][$count]['category'] = $term->get('name')->value;
+          }
+        }
+      }
+
+      $count++;
+    }
+  }
+
+  if ($view_id === 'map_items_list' && $view_current_display === 'block_1') {
+    $view_result = $view->result;
+
+    // Attach a 1-based counter to each result entity so the card-horizontal
+    // template can render a numbered SVG circle.
+    foreach ($view_result as $key => $result) {
+      if (isset($view_result[$key]->_entity)) {
+        $view_result[$key]->_entity->card_count = $key + 1;
+      }
+    }
+
+    $view->result = $view_result;
+  }
+}
+
+/**
+ * Implements hook_preprocess_views_view().
+ *
+ * Disables caching for the map_items_list view so that marker data in
+ * drupalSettings is always fresh.
+ */
+function geofield_map_marker_preprocess_views_view(&$variables) {
+  if ($variables['id'] === 'map_items_list') {
+    $variables['#cache']['contexts'][] = 'url.path';
+    $variables['#cache']['max-age'] = 0;
+  }
+}
+
+/**
+ * Implements hook_preprocess_node().
+ *
+ * - card_horizontal view mode: Exposes card_count and location as render
+ *   elements so the card-horizontal template can render them.
+ * - full view mode: Attaches the map_node library to show a single-marker
+ *   overlay on the node's geofield map.
+ */
+function geofield_map_marker_preprocess_node(&$variables) {
+  $view_mode = $variables['view_mode'];
+  $node_type = $variables['node']->getType();
+
+  if ($view_mode === 'card_horizontal' && $node_type === 'map_item') {
+    $node = $variables['node'];
+
+    $variables['#cache'] = [
+      'contexts' => ['url.path'],
+      'tags'     => ['node:' . $variables['node']->id()],
+      'max-age'  => 0,
+    ];
+
+    if (isset($node->card_count)) {
+      $variables['content']['card_count'] = [
+        '#type'       => 'html_tag',
+        '#tag'        => 'span',
+        '#value'      => $node->card_count,
+        '#attributes' => [
+          'id' => ['map-count-' . $node->card_count],
+        ],
+      ];
+    }
+
+    if (isset($node->location)) {
+      $variables['content']['location'] = [
+        '#type'       => 'html_tag',
+        '#tag'        => 'span',
+        '#value'      => $node->location,
+        '#attributes' => [
+          'id' => ['map-location-' . $node->card_count],
+        ],
+      ];
+    }
+  }
+
+  if ($view_mode === 'full' && $node_type === 'map_item') {
+    // Attach the single-node map JS library.
+    $variables['#attached']['library'][] = 'geofield_map_marker/map_node';
+  }
+}

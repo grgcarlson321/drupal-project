@@ -1,0 +1,15 @@
+promote_it.autocomplete:
+  path: '/autocomplete/promote_it'
+  defaults:
+    _controller: '\Drupal\promote_it\Controller\PromoteController::autocomplete'
+    _title: 'Autocomplete Promote It'
+  requirements:
+    _permission: 'manage promoted content order'
+
+promote_it.promote_form:
+  path: '/admin/content/promote'
+  defaults:
+    _form: '\Drupal\promote_it\Form\PromoteForm'
+    _title: 'Manage Promoted Content'
+  requirements:
+    _permission: 'manage promoted content order' 

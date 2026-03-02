@@ -1,0 +1,10 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: node.card_horizontal
+label: 'Card -- Horizontal'
+description: 'Used by the map_items_list view block display to render location cards alongside the map.'
+targetEntityType: node
+cache: true

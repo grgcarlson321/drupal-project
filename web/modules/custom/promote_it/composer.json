@@ -1,0 +1,9 @@
+{
+  "name": "drupal/promote_it",
+  "description": "Provides a custom field type and drag-and-drop interface for managing the order of promoted content.",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "drupal/core": "^10.0 || ^11.0"
+  }
+}

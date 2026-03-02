@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_geocode
+    - node.type.map_item
+id: node.map_item.field_geocode
+field_name: field_geocode
+entity_type: node
+bundle: map_item
+label: Geocode
+description: 'Auto-populated by geofield_map_marker_node_presave() as "Title, Category". The geocoder_field module reads this to populate field_map_coordinates.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

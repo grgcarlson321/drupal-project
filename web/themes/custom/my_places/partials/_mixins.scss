@@ -1,0 +1,43 @@
+// @file
+// SCSS mixins: responsive breakpoints.
+//
+// Named breakpoints map. Values are min-width thresholds.
+$breakpoints: (
+  'tiny':   480px,
+  'small':  640px,
+  'medium': 768px,
+  'large':  1024px,
+  'xlarge': 1280px,
+);
+
+// bp($min, $max) — media-query helper.
+//
+// Usage:
+//   @include bp(large)        → min-width: 1024px
+//   @include bp(none large)   → max-width: 1023px  (below large)
+//   @include bp(small large)  → min-width: 640px and max-width: 1023px
+@mixin bp($args...) {
+  $min-bp: nth($args, 1);
+  $max-bp: if(length($args) > 1, nth($args, 2), null);
+
+  @if $min-bp == 'none' and $max-bp != null {
+    // Upper bound only.
+    $max-val: map-get($breakpoints, $max-bp);
+    @media (max-width: calc(#{$max-val} - 1px)) {
+      @content;
+    }
+  } @else if $max-bp != null {
+    // Range.
+    $min-val: map-get($breakpoints, $min-bp);
+    $max-val: map-get($breakpoints, $max-bp);
+    @media (min-width: #{$min-val}) and (max-width: calc(#{$max-val} - 1px)) {
+      @content;
+    }
+  } @else {
+    // Lower bound only.
+    $min-val: map-get($breakpoints, $min-bp);
+    @media (min-width: #{$min-val}) {
+      @content;
+    }
+  }
+}

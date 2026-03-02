@@ -1,0 +1,6 @@
+promote_it.content_list:
+  title: 'Promote it'
+  description: 'Promote Content on Front page.'
+  parent: system.admin_content
+  route_name: promote_it.promote_form
+  weight: 0

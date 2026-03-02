@@ -1,0 +1,37 @@
+{% import '@my-places-components/component.twig' as component %}
+{% do attach_library('my_places/map-display') %}
+
+<div {{ component.attributes(['c-map-display','js-map-display']) }}>
+  <a href="#mapdisplay" class="focusable skip-link visually-hidden c-map-display__skip-to-map">
+    {{ 'Skip to Map'|t }}
+  </a>
+  <a href="#maplisting" class="focusable skip-link visually-hidden c-map-display__skip-to-listing">
+    {{ 'Skip to Listing'|t }}
+  </a>
+  <div class="c-map-display__main js-map-display__main">
+    <a id="view-results" tabindex="-1"></a>
+    <div class="c-map-display__drawer js-map-display__list">
+      <button class="c-map-display__drawer-toggle js-map-display__drawer-toggle"
+              aria-controls="map-display__drawer" aria-expanded="true">
+        <span class="visually-hidden">{{ 'Toggle Location List'|t }}</span>
+      </button>
+      <div class="c-map-display__drawer-inner js-map-display__drawer-inner" id="map-display__drawer">
+        <a id="maplisting" tabindex="-1"></a>
+        {% if rows -%}
+          {{ rows }}
+        {% elseif empty -%}
+          {{ empty }}
+        {% endif %}
+      </div>
+    </div>
+    <div class="c-map-display__map js-map-display__map" aria-hidden="true">
+      <a id="mapdisplay" tabindex="-1"></a>
+      {{ map }}
+    </div>
+  </div>
+  <div class="c-map-display__fixed js-map-display__fixed">
+    <a href="#mapdisplay" class="c-map-display__back-button js-map-display__back-button" aria-hidden="true">
+      {{ 'View Map'|t }}
+    </a>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+services:
+  promote_it.field_helper:
+    class: Drupal\promote_it\Service\PromoteFieldHelperService
+    arguments: ['@entity_type.manager', '@entity_field.manager']
+  promote_it.promote_weight_service:
+    class: Drupal\promote_it\Service\PromoteWeightService
+    arguments: ['@entity_type.manager', '@promote_it.field_helper']
+  promote_it.promote_query_service:
+    class: Drupal\promote_it\Service\PromoteQueryService
+    arguments: ['@entity_type.manager', '@promote_it.field_helper'] 

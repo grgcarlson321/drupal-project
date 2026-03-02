@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# Global
+# ---------------------------------------------------------------------------
+global:
+  version: 1.0
+  css:
+    theme:
+      build/libraries/global/global.css: {}
+  js:
+    build/libraries/global/global.js: {}
+  dependencies:
+    - core/jquery
+    - my_places/breakpoint
+
+# ---------------------------------------------------------------------------
+# Third-party libraries (place files in web/libraries/ before compiling)
+# ---------------------------------------------------------------------------
+gsap:
+  version: 3.10.3
+  js:
+    # Download from https://www.npmjs.com/package/gsap and place at:
+    # web/libraries/gsap/minified/gsap.min.js
+    /libraries/gsap/minified/gsap.min.js: { preprocess: false }
+
+in-view:
+  version: 1.0
+  js:
+    # Download from https://www.npmjs.com/package/in-view and place at:
+    # web/libraries/in-view/in-view.min.js
+    /libraries/in-view/in-view.min.js: { preprocess: false }
+
+breakpoint:
+  version: 1.0
+  js:
+    build/libraries/breakpoint/breakpoint.js: {}
+
+# ---------------------------------------------------------------------------
+# Component: Map Display
+# ---------------------------------------------------------------------------
+map-display:
+  css:
+    component:
+      build/components/map-display/map-display.css: {}
+  js:
+    build/components/map-display/map-display.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - my_places/breakpoint
+    - my_places/gsap
+    - my_places/in-view
+
+# ---------------------------------------------------------------------------
+# Component: Card Horizontal
+# ---------------------------------------------------------------------------
+card-horizontal:
+  css:
+    component:
+      build/components/card-horizontal/card-horizontal.css: {}

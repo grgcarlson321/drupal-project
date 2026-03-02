@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_intro_text
+    - node.type.map_item
+  module:
+    - text
+id: node.map_item.field_intro_text
+field_name: field_intro_text
+entity_type: node
+bundle: map_item
+label: 'Intro Text'
+description: 'A brief description of this location shown on the full node page.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long

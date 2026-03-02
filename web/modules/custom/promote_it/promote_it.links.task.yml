@@ -1,0 +1,5 @@
+promote_it.tab_view:
+  route_name: promote_it.promote_form
+  title: 'Promote'
+  base_route: system.admin_content
+  weight: 1

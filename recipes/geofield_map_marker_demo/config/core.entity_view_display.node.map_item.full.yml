@@ -1,0 +1,79 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.map_item.field_category
+    - field.field.node.map_item.field_geocode
+    - field.field.node.map_item.field_intro_text
+    - field.field.node.map_item.field_map_coordinates
+    - node.type.map_item
+  module:
+    - geofield_map
+    - text
+    - user
+id: node.map_item.full
+targetEntityType: node
+bundle: map_item
+mode: full
+content:
+  field_category:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_intro_text:
+    type: text_default
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_map_coordinates:
+    type: geofield_google_map
+    label: hidden
+    settings:
+      data_source: field_map_coordinates
+      entity_source: __base_table
+      map_dimensions:
+        width: 100%
+        height: 450px
+      map_center:
+        lat: 0
+        lon: 0
+        center_force: false
+        geocode: ''
+      map_zoom_and_pan:
+        zoom:
+          initial: 14
+          force: false
+          min: 1
+          max: 22
+          finer: 0
+        gestureHandling: auto
+        scrollwheel: true
+        draggable: true
+      map_controls:
+        disable_default_ui: false
+        zoom_control: true
+        map_type_id: roadmap
+        map_type_control: true
+        street_view_control: false
+        fullscreen_control: false
+      map_marker_and_infowindow:
+        icon_image_path: ''
+        infowindow_field: title
+        view_mode: full
+        tooltip_field: title
+        multivalue_split: false
+      map_additional_options: '{"mapTypeControl":false}'
+      map_lazy_load:
+        lazy_load: true
+    third_party_settings: {  }
+    weight: 2
+    region: content
+hidden:
+  field_geocode: true
+  links: true

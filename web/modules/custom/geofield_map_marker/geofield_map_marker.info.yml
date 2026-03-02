@@ -1,0 +1,11 @@
+name: 'Geofield Map Marker'
+type: module
+description: 'Displays location content types on an interactive Google Map with numbered SVG markers, hover/click sync between a card list and the map, transit layer toggle, and per-node single-marker overlay. Depends on geofield_map and geocoder_field.'
+core_version_requirement: ^10.0 || ^11.0
+version: '1.0'
+package: 'Custom'
+dependencies:
+  - drupal:node
+  - drupal:views
+  - drupal:taxonomy
+  - geofield_map:geofield_map
